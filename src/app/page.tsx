@@ -24,9 +24,6 @@ export default function Page() {
         <DuotoneConverter
           shadowHex="#145527"
           highlightHex="#F784C5"
-        // onChange={(url) => {
-        //   console.log('Hasil dataURL:', url?.slice(0, 64) + '...');
-        // }}
         />
       </main>
 

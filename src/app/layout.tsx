@@ -2,25 +2,25 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Brave Pink Indonesia — Konverter Duotone (#145527 → #F784C5)',
+  title: 'Brave Pink Hero Green Indonesia — Konverter Duotone (#145527 → #F784C5)',
   description:
     'Ubah foto menjadi duotone hijau–pink langsung di browser. Tanpa unggah ke server, cepat dan privat.',
   keywords: [
-    'duotone', 'konverter gambar', 'hijau', 'pink', '#145527', '#F784C5',
-    'efek foto', 'filter gambar'
+    'brave', 'pink', 'hero', 'green', 'duotone', 'konverter gambar', 'hijau', 'pink',
+    'efek foto', 'filter gambar', 'indonesia'
   ],
-  authors: [{ name: 'Brave Pink Indonesia' }],
-  creator: 'Brave Pink Indonesia',
-  publisher: 'Brave Pink Indonesia',
+  authors: [{ name: 'Brave Pink Hero Green Indonesia' }],
+  creator: 'Brave Pink Hero Green Indonesia',
+  publisher: 'Brave Pink Hero Green Indonesia',
   robots: 'index, follow',
-  metadataBase: new URL('https://contoh-domainmu.vercel.app'), // ganti saat deploy
+  metadataBase: new URL('https://brave-pink-hero-green.vercel.app/'),
   openGraph: {
-    title: 'Brave Pink Indonesia — Duotone Hijau–Pink',
+    title: 'Brave Pink Hero Green Indonesia — Duotone Hijau–Pink',
     description:
       'Transformasikan fotomu ke gaya duotone hijau–pink langsung di browser.',
-    url: 'https://contoh-domainmu.vercel.app',
-    siteName: 'Brave Pink Indonesia',
-    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Pratinjau Brave Pink Indonesia' }],
+    url: 'https://brave-pink-hero-green.vercel.app/',
+    siteName: 'Brave Pink Hero Green Indonesia',
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Pratinjau Brave Pink Hero Green Indonesia' }],
     locale: 'id_ID',
     type: 'website',
   },
@@ -34,8 +34,7 @@ export const metadata: Metadata = {
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#10b981' },
     { media: '(prefers-color-scheme: dark)', color: '#145527' },
-  ],
-  manifest: '/manifest.json',
+  ]
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
