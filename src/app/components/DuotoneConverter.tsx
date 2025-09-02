@@ -13,7 +13,7 @@ export type DuotoneConverterProps = {
     highlightHex: string;
     maxSizeMB?: number;
     className?: string;
-    onChange?: (dataUrl: string | null) => void;
+    onChange?: (dataUrlOrBlobUrl: string | null) => void;
     showUrlInput?: boolean;
 };
 
@@ -63,6 +63,44 @@ function applyDuotoneToCanvas(
     ctx.putImageData(imageData, 0, 0);
 }
 
+function canvasToBlobURL(
+    canvas: HTMLCanvasElement,
+    type = 'image/png',
+    quality?: number
+): Promise<{ blob: Blob; url: string }> {
+    return new Promise((resolve, reject) => {
+        canvas.toBlob((b) => {
+            if (!b) return reject(new Error('Gagal membuat Blob dari canvas.'));
+            const u = URL.createObjectURL(b);
+            resolve({ blob: b, url: u });
+        }, type, quality);
+    });
+}
+
+function getBaseNameFromFile(file?: File | null) {
+    if (!file?.name) return null;
+    const n = file.name.replace(/\.[^.]+$/, '');
+    return n || null;
+}
+function getBaseNameFromUrl(url: string) {
+    try {
+        const u = new URL(url);
+        const last = u.pathname.split('/').filter(Boolean).pop() || 'image';
+        const n = last.replace(/\.[^.]+$/, '');
+        return n || 'image';
+    } catch {
+        return 'image';
+    }
+}
+function slugifyName(n: string) {
+    return n
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9-_]+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
+}
+
 export default function DuotoneConverter({
     shadowHex,
     highlightHex,
@@ -72,15 +110,25 @@ export default function DuotoneConverter({
     showUrlInput = true,
 }: DuotoneConverterProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
+
     const [loading, setLoading] = useState(false);
-    const [resultUrl, setResultUrl] = useState<string | null>(null);
+    const [resultUrl, setResultUrl] = useState<string | null>(null); // Blob URL untuk preview & download
     const [urlInput, setUrlInput] = useState('');
     const [hasImage, setHasImage] = useState(false);
+
+    const [originalName, setOriginalName] = useState<string>('image');
 
     const currentBlobUrlRef = useRef<string | null>(null);
 
     const shadow = useMemo(() => hexToRgb(shadowHex), [shadowHex]);
     const highlight = useMemo(() => hexToRgb(highlightHex), [highlightHex]);
+
+    const revokeCurrentBlobUrl = () => {
+        if (currentBlobUrlRef.current) {
+            URL.revokeObjectURL(currentBlobUrlRef.current);
+            currentBlobUrlRef.current = null;
+        }
+    };
 
     const processImage = useCallback(
         (img: HTMLImageElement) => {
@@ -88,10 +136,19 @@ export default function DuotoneConverter({
             if (!canvas) return;
 
             applyDuotoneToCanvas(canvas, img, shadow, highlight);
-            const url = canvas.toDataURL('image/png');
-            setResultUrl(url);
-            setHasImage(true);
-            onChange?.(url);
+
+            revokeCurrentBlobUrl();
+            canvasToBlobURL(canvas)
+                .then(({ url }) => {
+                    currentBlobUrlRef.current = url;
+                    setResultUrl(url);
+                    setHasImage(true);
+                    onChange?.(url);
+                })
+                .catch((err) => {
+                    console.error(err);
+                    alert('Gagal memproses gambar.');
+                });
         },
         [shadow, highlight, onChange]
     );
@@ -107,24 +164,24 @@ export default function DuotoneConverter({
                 return;
             }
 
+            const base = getBaseNameFromFile(file) || 'image';
+            setOriginalName(base);
+
             setLoading(true);
             const img = new window.Image();
             const blobUrl = URL.createObjectURL(file);
-
-            if (currentBlobUrlRef.current) {
-                URL.revokeObjectURL(currentBlobUrlRef.current);
-            }
-            currentBlobUrlRef.current = blobUrl;
 
             img.onload = () => {
                 requestAnimationFrame(() => {
                     processImage(img);
                     setLoading(false);
+                    URL.revokeObjectURL(blobUrl);
                 });
             };
             img.onerror = () => {
                 setLoading(false);
                 alert('Gagal memuat gambar.');
+                URL.revokeObjectURL(blobUrl);
             };
             img.src = blobUrl;
         },
@@ -138,6 +195,7 @@ export default function DuotoneConverter({
             } catch {
                 return alert('URL tidak valid.');
             }
+            setOriginalName(getBaseNameFromUrl(url));
             setLoading(true);
 
             const img = new window.Image();
@@ -174,9 +232,12 @@ export default function DuotoneConverter({
 
     const handleDownload = () => {
         if (!resultUrl) return;
+        const base = slugifyName(originalName || 'image');
+        const filename = `${base}-duotone.png`;
+
         const a = document.createElement('a');
         a.href = resultUrl;
-        a.download = `BRAVE-${Date.now()}.png`;
+        a.download = filename;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -184,9 +245,7 @@ export default function DuotoneConverter({
 
     useEffect(() => {
         return () => {
-            if (currentBlobUrlRef.current) {
-                URL.revokeObjectURL(currentBlobUrlRef.current);
-            }
+            revokeCurrentBlobUrl();
         };
     }, []);
 
@@ -203,7 +262,7 @@ export default function DuotoneConverter({
                     <div
                         {...getRootProps()}
                         className={`relative border-2 border-dashed rounded-xl px-6 py-8 text-center transition-all cursor-pointer
-              ${isDragActive ? 'border-emerald-400 bg-emerald-50/60' : 'border-gray-300 hover:border-emerald-400 hover:bg-emerald-50/50'}`}
+            ${isDragActive ? 'border-emerald-400 bg-emerald-50/60' : 'border-gray-300 hover:border-emerald-400 hover:bg-emerald-50/50'}`}
                     >
                         <input {...getInputProps()} aria-label="Unggah berkas gambar" />
 
@@ -212,7 +271,7 @@ export default function DuotoneConverter({
                                 <div className="relative w-full h-80 rounded-lg overflow-hidden bg-white border border-gray-200">
                                     <NextImage
                                         src={resultUrl}
-                                        alt="Hasil duotone hijau–pink"
+                                        alt="Hasil duotone"
                                         fill
                                         sizes="100vw"
                                         unoptimized
