@@ -12,8 +12,8 @@ export default function Page() {
             <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-emerald-600 to-pink-500 flex items-center justify-center">
               <Palette className="w-4 h-4 text-white" />
             </div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-pink-500 bg-clip-text text-transparent">
-              BRAVE PINK HERO GREEN INDONESIA
+            <h1 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-emerald-600 to-pink-500 bg-clip-text text-transparent">
+              BRAVE PINK HERO GREEN
             </h1>
           </div>
           <p className="text-gray-600 mt-2">Semua proses di browser. Tidak menyimpan data dari perangkatmu.</p>
