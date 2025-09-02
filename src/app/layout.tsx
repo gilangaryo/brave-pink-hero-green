@@ -1,4 +1,3 @@
-// app/layout.tsx
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
@@ -31,7 +30,6 @@ export const metadata: Metadata = {
     images: ['/og-image.png'],
   },
 
-  // (Opsional) pindahkan icon ke sini juga
   icons: {
     icon: [
       { url: '/favicon.svg', type: 'image/svg+xml' },
@@ -39,7 +37,6 @@ export const metadata: Metadata = {
     ],
   },
 
-  // (Opsional) PWA meta via metadata
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -60,10 +57,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="id" className="scroll-smooth">
       <head>
-        {/* Preconnect boleh tetap di <head> */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        {/* Meta tambahan */}
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
       </head>
@@ -80,7 +75,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
         </div>
 
-        {/* Schema.org */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
